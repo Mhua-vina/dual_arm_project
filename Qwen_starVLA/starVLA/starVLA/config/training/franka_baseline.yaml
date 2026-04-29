@@ -1,0 +1,87 @@
+run_id: franka_demo_baseline
+run_root_dir: /mnt/bigdata/minghua/starVLA_project/training_results_baseline
+seed: 42
+trackers: [jsonl, wandb]
+wandb_entity: your-wandb-entity
+wandb_project: franka_baseline
+is_debug: false
+
+framework:
+  name: QwenAdapter
+  qwenvl:
+    base_vlm: /mnt/bigdata/minghua/starVLA_project/starVLA/playground/Pretrained_models/Qwen2-VL-2B-Instruct
+    attn_implementation: sdpa
+    vl_hidden_dim: 1536
+  dino:
+    dino_backbone: dinov2_vits14
+  action_model:
+    action_model_type: VLA-Adapter
+    hidden_dim: 1536
+    # 🌟 严格对齐 Franka 官方数据的 7 维
+    action_dim: 7
+    state_dim: 7
+    action_query_num: 64
+    use_pro_version: true
+    use_proprio: false
+    phase: Training
+    num_actions_chunk: 8
+    future_action_window_size: 7
+  reduce_in_full_precision: true
+
+datasets:
+  vla_data:
+    dataset_py: lerobot_datasets
+    # 🌟 指向官方 Demo 数据的根目录
+    data_root_dir: /mnt/bigdata/minghua/starVLA_project/starVLA/playground/demo_data
+    # 🌟 指定具体的混合数据集名称
+    data_mix: demo_sim_pick_place
+    action_type: absolute_qpos
+    CoT_prompt: "Your task is {instruction}. To identify the key objects for your task. Locate their bounding boxes in [x1,y1,x2,y2] format."
+    CoT_answer: bbox
+    default_image_resolution: [3, 224, 224]
+    per_device_batch_size: 1
+    load_all_data_for_training: false
+    num_workers: 0
+    pin_memory: false
+    prefetch_factor: null
+    # 🌟 严格对齐官方 info.json 里的相机名
+    obs: ["base_view"]
+    video_backend: torchvision_av
+
+trainer:
+  epochs: 100
+  max_train_steps: 100000
+  num_warmup_steps: 5000
+  save_interval: 5000
+  eval_interval: 100
+  learning_rate:
+    base: 2.0e-05
+    qwen_vl_interface: 2.0e-05
+    action_model: 1.0e-04
+  lr_scheduler_type: constant
+  scheduler_specific_kwargs:
+    min_lr: 1.0e-06
+  freeze_modules: '.*qwen.*|.*vlm.*'
+  loss_scale:
+    vla: 1.0
+    vlm: 1.0
+  max_grad_norm: 1.0
+  warmup_ratio: 0.1
+  weight_decay: 0.0
+  logging_frequency: 10
+  gradient_clipping: 1.0
+  gradient_accumulation_steps: 4
+
+  optimizer:
+    name: AdamW
+    betas: [0.9, 0.95]
+    eps: 1.0e-08
+    weight_decay: 1.0e-08
+
+  save_format: pt
+  is_resume: false
+  resume_epoch: null
+  resume_step: null
+  enable_gradient_checkpointing: true
+  enable_mixed_precision_training: true
+  bf16: true

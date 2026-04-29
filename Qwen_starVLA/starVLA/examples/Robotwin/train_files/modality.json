@@ -1,0 +1,36 @@
+{
+    "action": {
+        "left_joints": {
+            "start": 0,
+            "end": 6,
+            "original_key": "action"
+        },
+        "left_gripper": {
+            "start": 6,
+            "end": 7,
+            "original_key": "action"
+        },
+        "right_joints": {
+            "start": 7,
+            "end": 13,
+            "original_key": "action"
+        },
+        "right_gripper": {
+            "start": 13,
+            "end": 14,
+            "original_key": "action"
+        }
+    },
+    
+    "video": {
+        "main_camera": {
+            "original_key": "observation.images.main_camera"
+        }
+       
+    },
+    "annotation": {
+        "human.action.task_description": {
+            "original_key": "task_index"
+        }
+    }
+}
