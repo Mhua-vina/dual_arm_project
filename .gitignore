@@ -1,0 +1,15 @@
+# 排除大型虚拟环境文件夹
+conda_envs/
+conda_pkgs/
+
+# 排除之前产生的大型数据集
+**/piper_vla_dataset/
+*.tar.gz
+*.zip
+*.npy
+*.jpg
+*.png
+
+# 排除隐藏的缓存文件
+.cache/
+__pycache__/
